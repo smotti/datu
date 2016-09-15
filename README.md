@@ -1,12 +1,12 @@
 # Description
 
 A pomodoro app that tracks how many pomodoros & breaks were required for a
-selected task. And maybe some other statistics.
+task.
 
 # Rational
 
-* Keep track of work to do
 * Feedback for better estimation (main reason)
+* Keep track of work to do
 * Record of work
 
 # License
