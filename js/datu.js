@@ -8746,6 +8746,14 @@ var _user$project$Datu$main = {
 var Elm = {};
 Elm['Datu'] = Elm['Datu'] || {};
 _elm_lang$core$Native_Platform.addPublicModule(Elm['Datu'], 'Datu', typeof _user$project$Datu$main === 'undefined' ? null : _user$project$Datu$main);
+Elm['Messages'] = Elm['Messages'] || {};
+_elm_lang$core$Native_Platform.addPublicModule(Elm['Messages'], 'Messages', typeof _user$project$Messages$main === 'undefined' ? null : _user$project$Messages$main);
+Elm['Models'] = Elm['Models'] || {};
+_elm_lang$core$Native_Platform.addPublicModule(Elm['Models'], 'Models', typeof _user$project$Models$main === 'undefined' ? null : _user$project$Models$main);
+Elm['Update'] = Elm['Update'] || {};
+_elm_lang$core$Native_Platform.addPublicModule(Elm['Update'], 'Update', typeof _user$project$Update$main === 'undefined' ? null : _user$project$Update$main);
+Elm['Views'] = Elm['Views'] || {};
+_elm_lang$core$Native_Platform.addPublicModule(Elm['Views'], 'Views', typeof _user$project$Views$main === 'undefined' ? null : _user$project$Views$main);
 
 if (typeof define === "function" && define['amd'])
 {
