@@ -2709,6 +2709,39 @@ var _elm_lang$core$Char$isHexDigit = function ($char) {
 		$char));
 };
 
+//import Result //
+
+var _elm_lang$core$Native_Date = function() {
+
+function fromString(str)
+{
+	var date = new Date(str);
+	return isNaN(date.getTime())
+		? _elm_lang$core$Result$Err('Unable to parse \'' + str + '\' as a date. Dates must be in the ISO 8601 format.')
+		: _elm_lang$core$Result$Ok(date);
+}
+
+var dayTable = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+var monthTable =
+	['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+	 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+
+return {
+	fromString: fromString,
+	year: function(d) { return d.getFullYear(); },
+	month: function(d) { return { ctor: monthTable[d.getMonth()] }; },
+	day: function(d) { return d.getDate(); },
+	hour: function(d) { return d.getHours(); },
+	minute: function(d) { return d.getMinutes(); },
+	second: function(d) { return d.getSeconds(); },
+	millisecond: function(d) { return d.getMilliseconds(); },
+	toTime: function(d) { return d.getTime(); },
+	fromTime: function(t) { return new Date(t); },
+	dayOfWeek: function(d) { return { ctor: dayTable[d.getDay()] }; }
+};
+
+}();
 //import Native.Utils //
 
 var _elm_lang$core$Native_Scheduler = function() {
@@ -5527,6 +5560,39 @@ var _elm_lang$core$Time$subMap = F2(
 	});
 _elm_lang$core$Native_Platform.effectManagers['Time'] = {pkg: 'elm-lang/core', init: _elm_lang$core$Time$init, onEffects: _elm_lang$core$Time$onEffects, onSelfMsg: _elm_lang$core$Time$onSelfMsg, tag: 'sub', subMap: _elm_lang$core$Time$subMap};
 
+var _elm_lang$core$Date$millisecond = _elm_lang$core$Native_Date.millisecond;
+var _elm_lang$core$Date$second = _elm_lang$core$Native_Date.second;
+var _elm_lang$core$Date$minute = _elm_lang$core$Native_Date.minute;
+var _elm_lang$core$Date$hour = _elm_lang$core$Native_Date.hour;
+var _elm_lang$core$Date$dayOfWeek = _elm_lang$core$Native_Date.dayOfWeek;
+var _elm_lang$core$Date$day = _elm_lang$core$Native_Date.day;
+var _elm_lang$core$Date$month = _elm_lang$core$Native_Date.month;
+var _elm_lang$core$Date$year = _elm_lang$core$Native_Date.year;
+var _elm_lang$core$Date$fromTime = _elm_lang$core$Native_Date.fromTime;
+var _elm_lang$core$Date$toTime = _elm_lang$core$Native_Date.toTime;
+var _elm_lang$core$Date$fromString = _elm_lang$core$Native_Date.fromString;
+var _elm_lang$core$Date$now = A2(_elm_lang$core$Task$map, _elm_lang$core$Date$fromTime, _elm_lang$core$Time$now);
+var _elm_lang$core$Date$Date = {ctor: 'Date'};
+var _elm_lang$core$Date$Sun = {ctor: 'Sun'};
+var _elm_lang$core$Date$Sat = {ctor: 'Sat'};
+var _elm_lang$core$Date$Fri = {ctor: 'Fri'};
+var _elm_lang$core$Date$Thu = {ctor: 'Thu'};
+var _elm_lang$core$Date$Wed = {ctor: 'Wed'};
+var _elm_lang$core$Date$Tue = {ctor: 'Tue'};
+var _elm_lang$core$Date$Mon = {ctor: 'Mon'};
+var _elm_lang$core$Date$Dec = {ctor: 'Dec'};
+var _elm_lang$core$Date$Nov = {ctor: 'Nov'};
+var _elm_lang$core$Date$Oct = {ctor: 'Oct'};
+var _elm_lang$core$Date$Sep = {ctor: 'Sep'};
+var _elm_lang$core$Date$Aug = {ctor: 'Aug'};
+var _elm_lang$core$Date$Jul = {ctor: 'Jul'};
+var _elm_lang$core$Date$Jun = {ctor: 'Jun'};
+var _elm_lang$core$Date$May = {ctor: 'May'};
+var _elm_lang$core$Date$Apr = {ctor: 'Apr'};
+var _elm_lang$core$Date$Mar = {ctor: 'Mar'};
+var _elm_lang$core$Date$Feb = {ctor: 'Feb'};
+var _elm_lang$core$Date$Jan = {ctor: 'Jan'};
+
 var _elm_lang$core$Debug$crash = _elm_lang$core$Native_Debug.crash;
 var _elm_lang$core$Debug$log = _elm_lang$core$Native_Debug.log;
 
@@ -6265,6 +6331,141 @@ var _elm_lang$core$Json_Decode$dict = function (decoder) {
 		_elm_lang$core$Json_Decode$keyValuePairs(decoder));
 };
 var _elm_lang$core$Json_Decode$Decoder = {ctor: 'Decoder'};
+
+//import Maybe, Native.List //
+
+var _elm_lang$core$Native_Regex = function() {
+
+function escape(str)
+{
+	return str.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+}
+function caseInsensitive(re)
+{
+	return new RegExp(re.source, 'gi');
+}
+function regex(raw)
+{
+	return new RegExp(raw, 'g');
+}
+
+function contains(re, string)
+{
+	return string.match(re) !== null;
+}
+
+function find(n, re, str)
+{
+	n = n.ctor === 'All' ? Infinity : n._0;
+	var out = [];
+	var number = 0;
+	var string = str;
+	var lastIndex = re.lastIndex;
+	var prevLastIndex = -1;
+	var result;
+	while (number++ < n && (result = re.exec(string)))
+	{
+		if (prevLastIndex === re.lastIndex) break;
+		var i = result.length - 1;
+		var subs = new Array(i);
+		while (i > 0)
+		{
+			var submatch = result[i];
+			subs[--i] = submatch === undefined
+				? _elm_lang$core$Maybe$Nothing
+				: _elm_lang$core$Maybe$Just(submatch);
+		}
+		out.push({
+			match: result[0],
+			submatches: _elm_lang$core$Native_List.fromArray(subs),
+			index: result.index,
+			number: number
+		});
+		prevLastIndex = re.lastIndex;
+	}
+	re.lastIndex = lastIndex;
+	return _elm_lang$core$Native_List.fromArray(out);
+}
+
+function replace(n, re, replacer, string)
+{
+	n = n.ctor === 'All' ? Infinity : n._0;
+	var count = 0;
+	function jsReplacer(match)
+	{
+		if (count++ >= n)
+		{
+			return match;
+		}
+		var i = arguments.length - 3;
+		var submatches = new Array(i);
+		while (i > 0)
+		{
+			var submatch = arguments[i];
+			submatches[--i] = submatch === undefined
+				? _elm_lang$core$Maybe$Nothing
+				: _elm_lang$core$Maybe$Just(submatch);
+		}
+		return replacer({
+			match: match,
+			submatches: _elm_lang$core$Native_List.fromArray(submatches),
+			index: arguments[i - 1],
+			number: count
+		});
+	}
+	return string.replace(re, jsReplacer);
+}
+
+function split(n, re, str)
+{
+	n = n.ctor === 'All' ? Infinity : n._0;
+	if (n === Infinity)
+	{
+		return _elm_lang$core$Native_List.fromArray(str.split(re));
+	}
+	var string = str;
+	var result;
+	var out = [];
+	var start = re.lastIndex;
+	while (n--)
+	{
+		if (!(result = re.exec(string))) break;
+		out.push(string.slice(start, result.index));
+		start = re.lastIndex;
+	}
+	out.push(string.slice(start));
+	return _elm_lang$core$Native_List.fromArray(out);
+}
+
+return {
+	regex: regex,
+	caseInsensitive: caseInsensitive,
+	escape: escape,
+
+	contains: F2(contains),
+	find: F3(find),
+	replace: F4(replace),
+	split: F3(split)
+};
+
+}();
+
+var _elm_lang$core$Regex$split = _elm_lang$core$Native_Regex.split;
+var _elm_lang$core$Regex$replace = _elm_lang$core$Native_Regex.replace;
+var _elm_lang$core$Regex$find = _elm_lang$core$Native_Regex.find;
+var _elm_lang$core$Regex$contains = _elm_lang$core$Native_Regex.contains;
+var _elm_lang$core$Regex$caseInsensitive = _elm_lang$core$Native_Regex.caseInsensitive;
+var _elm_lang$core$Regex$regex = _elm_lang$core$Native_Regex.regex;
+var _elm_lang$core$Regex$escape = _elm_lang$core$Native_Regex.escape;
+var _elm_lang$core$Regex$Match = F4(
+	function (a, b, c, d) {
+		return {match: a, submatches: b, index: c, number: d};
+	});
+var _elm_lang$core$Regex$Regex = {ctor: 'Regex'};
+var _elm_lang$core$Regex$AtMost = function (a) {
+	return {ctor: 'AtMost', _0: a};
+};
+var _elm_lang$core$Regex$All = {ctor: 'All'};
 
 //import Native.Json //
 
@@ -8346,6 +8547,206 @@ var _elm_lang$html$Html_Events$Options = F2(
 		return {stopPropagation: a, preventDefault: b};
 	});
 
+var _mgold$elm_date_format$Date_Format$padWith = function (c) {
+	return function (_p0) {
+		return A3(
+			_elm_lang$core$String$padLeft,
+			2,
+			c,
+			_elm_lang$core$Basics$toString(_p0));
+	};
+};
+var _mgold$elm_date_format$Date_Format$zero2twelve = function (n) {
+	return _elm_lang$core$Native_Utils.eq(n, 0) ? 12 : n;
+};
+var _mgold$elm_date_format$Date_Format$mod12 = function (h) {
+	return A2(_elm_lang$core$Basics_ops['%'], h, 12);
+};
+var _mgold$elm_date_format$Date_Format$fullDayOfWeek = function (dow) {
+	var _p1 = dow;
+	switch (_p1.ctor) {
+		case 'Mon':
+			return 'Monday';
+		case 'Tue':
+			return 'Tuesday';
+		case 'Wed':
+			return 'Wednesday';
+		case 'Thu':
+			return 'Thursday';
+		case 'Fri':
+			return 'Friday';
+		case 'Sat':
+			return 'Saturday';
+		default:
+			return 'Sunday';
+	}
+};
+var _mgold$elm_date_format$Date_Format$monthToFullName = function (m) {
+	var _p2 = m;
+	switch (_p2.ctor) {
+		case 'Jan':
+			return 'January';
+		case 'Feb':
+			return 'February';
+		case 'Mar':
+			return 'March';
+		case 'Apr':
+			return 'April';
+		case 'May':
+			return 'May';
+		case 'Jun':
+			return 'June';
+		case 'Jul':
+			return 'July';
+		case 'Aug':
+			return 'August';
+		case 'Sep':
+			return 'September';
+		case 'Oct':
+			return 'October';
+		case 'Nov':
+			return 'November';
+		default:
+			return 'December';
+	}
+};
+var _mgold$elm_date_format$Date_Format$monthToInt = function (m) {
+	var _p3 = m;
+	switch (_p3.ctor) {
+		case 'Jan':
+			return 1;
+		case 'Feb':
+			return 2;
+		case 'Mar':
+			return 3;
+		case 'Apr':
+			return 4;
+		case 'May':
+			return 5;
+		case 'Jun':
+			return 6;
+		case 'Jul':
+			return 7;
+		case 'Aug':
+			return 8;
+		case 'Sep':
+			return 9;
+		case 'Oct':
+			return 10;
+		case 'Nov':
+			return 11;
+		default:
+			return 12;
+	}
+};
+var _mgold$elm_date_format$Date_Format$formatToken = F2(
+	function (d, m) {
+		var symbol = function () {
+			var _p4 = m.submatches;
+			if (((_p4.ctor === '::') && (_p4._0.ctor === 'Just')) && (_p4._1.ctor === '[]')) {
+				return _p4._0._0;
+			} else {
+				return ' ';
+			}
+		}();
+		var _p5 = symbol;
+		switch (_p5) {
+			case '%':
+				return '%';
+			case 'Y':
+				return _elm_lang$core$Basics$toString(
+					_elm_lang$core$Date$year(d));
+			case 'm':
+				return A3(
+					_elm_lang$core$String$padLeft,
+					2,
+					_elm_lang$core$Native_Utils.chr('0'),
+					_elm_lang$core$Basics$toString(
+						_mgold$elm_date_format$Date_Format$monthToInt(
+							_elm_lang$core$Date$month(d))));
+			case 'B':
+				return _mgold$elm_date_format$Date_Format$monthToFullName(
+					_elm_lang$core$Date$month(d));
+			case 'b':
+				return _elm_lang$core$Basics$toString(
+					_elm_lang$core$Date$month(d));
+			case 'd':
+				return A2(
+					_mgold$elm_date_format$Date_Format$padWith,
+					_elm_lang$core$Native_Utils.chr('0'),
+					_elm_lang$core$Date$day(d));
+			case 'e':
+				return A2(
+					_mgold$elm_date_format$Date_Format$padWith,
+					_elm_lang$core$Native_Utils.chr(' '),
+					_elm_lang$core$Date$day(d));
+			case 'a':
+				return _elm_lang$core$Basics$toString(
+					_elm_lang$core$Date$dayOfWeek(d));
+			case 'A':
+				return _mgold$elm_date_format$Date_Format$fullDayOfWeek(
+					_elm_lang$core$Date$dayOfWeek(d));
+			case 'H':
+				return A2(
+					_mgold$elm_date_format$Date_Format$padWith,
+					_elm_lang$core$Native_Utils.chr('0'),
+					_elm_lang$core$Date$hour(d));
+			case 'k':
+				return A2(
+					_mgold$elm_date_format$Date_Format$padWith,
+					_elm_lang$core$Native_Utils.chr(' '),
+					_elm_lang$core$Date$hour(d));
+			case 'I':
+				return A2(
+					_mgold$elm_date_format$Date_Format$padWith,
+					_elm_lang$core$Native_Utils.chr('0'),
+					_mgold$elm_date_format$Date_Format$zero2twelve(
+						_mgold$elm_date_format$Date_Format$mod12(
+							_elm_lang$core$Date$hour(d))));
+			case 'l':
+				return A2(
+					_mgold$elm_date_format$Date_Format$padWith,
+					_elm_lang$core$Native_Utils.chr(' '),
+					_mgold$elm_date_format$Date_Format$zero2twelve(
+						_mgold$elm_date_format$Date_Format$mod12(
+							_elm_lang$core$Date$hour(d))));
+			case 'p':
+				return (_elm_lang$core$Native_Utils.cmp(
+					_elm_lang$core$Date$hour(d),
+					12) < 0) ? 'AM' : 'PM';
+			case 'P':
+				return (_elm_lang$core$Native_Utils.cmp(
+					_elm_lang$core$Date$hour(d),
+					12) < 0) ? 'am' : 'pm';
+			case 'M':
+				return A2(
+					_mgold$elm_date_format$Date_Format$padWith,
+					_elm_lang$core$Native_Utils.chr('0'),
+					_elm_lang$core$Date$minute(d));
+			case 'S':
+				return A2(
+					_mgold$elm_date_format$Date_Format$padWith,
+					_elm_lang$core$Native_Utils.chr('0'),
+					_elm_lang$core$Date$second(d));
+			default:
+				return '';
+		}
+	});
+var _mgold$elm_date_format$Date_Format$re = _elm_lang$core$Regex$regex('%(%|Y|m|B|b|d|e|a|A|H|k|I|l|p|P|M|S)');
+var _mgold$elm_date_format$Date_Format$format = F2(
+	function (s, d) {
+		return A4(
+			_elm_lang$core$Regex$replace,
+			_elm_lang$core$Regex$All,
+			_mgold$elm_date_format$Date_Format$re,
+			_mgold$elm_date_format$Date_Format$formatToken(d),
+			s);
+	});
+var _mgold$elm_date_format$Date_Format$formatISO8601 = _mgold$elm_date_format$Date_Format$format('%Y-%m-%dT%H:%M:%SZ');
+
+var _user$project$Models$defaultLongBreakTime = 25 * _elm_lang$core$Time$minute;
+var _user$project$Models$defaultShortBreakTime = 5 * _elm_lang$core$Time$minute;
+var _user$project$Models$defaultPomodoroTime = 25 * _elm_lang$core$Time$minute;
 var _user$project$Models$Model = F7(
 	function (a, b, c, d, e, f, g) {
 		return {showSettings: a, pomodoroTime: b, shortBreakTime: c, longBreakTime: d, timer: e, pomodoroStep: f, timerEnabled: g};
@@ -8353,7 +8754,7 @@ var _user$project$Models$Model = F7(
 var _user$project$Models$LongBreak = {ctor: 'LongBreak'};
 var _user$project$Models$ShortBreak = {ctor: 'ShortBreak'};
 var _user$project$Models$Pomodoro = {ctor: 'Pomodoro'};
-var _user$project$Models$model = {showSettings: false, pomodoroTime: 25 * _elm_lang$core$Time$minute, shortBreakTime: 5 * _elm_lang$core$Time$minute, longBreakTime: 25 * _elm_lang$core$Time$minute, timer: 0, pomodoroStep: _user$project$Models$Pomodoro, timerEnabled: false};
+var _user$project$Models$model = {showSettings: false, pomodoroTime: _user$project$Models$defaultPomodoroTime, shortBreakTime: _user$project$Models$defaultShortBreakTime, longBreakTime: _user$project$Models$defaultLongBreakTime, timer: _user$project$Models$defaultPomodoroTime, pomodoroStep: _user$project$Models$Pomodoro, timerEnabled: false};
 
 var _user$project$Messages$Do = function (a) {
 	return {ctor: 'Do', _0: a};
@@ -8398,11 +8799,22 @@ var _user$project$Update$update = F2(
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
 			case 'StopTimer':
+				var time = function () {
+					var _p3 = model.pomodoroStep;
+					switch (_p3.ctor) {
+						case 'Pomodoro':
+							return model.pomodoroTime;
+						case 'ShortBreak':
+							return model.shortBreakTime;
+						default:
+							return model.longBreakTime;
+					}
+				}();
 				return {
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
 						model,
-						{timer: 0, timerEnabled: false}),
+						{timer: time, timerEnabled: false}),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
 			case 'ToggleTimerSettings':
@@ -8416,18 +8828,24 @@ var _user$project$Update$update = F2(
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
 			default:
+				var mustStop = (_elm_lang$core$Native_Utils.cmp(model.timer, 0) < 1) ? true : false;
+				var newTimer = _elm_lang$core$Basics$not(
+					_elm_lang$core$Native_Utils.cmp(model.timer, 0) < 1) ? (model.timer - _elm_lang$core$Time$second) : model.timer;
 				return {
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
 						model,
-						{timer: model.timer - 1}),
+						{
+							timer: newTimer,
+							timerEnabled: _elm_lang$core$Basics$not(mustStop)
+						}),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
 		}
 	});
-var _user$project$Update$subscriptions = function (_p3) {
-	var _p4 = _p3;
-	return _p4.timerEnabled ? A2(_elm_lang$core$Time$every, _elm_lang$core$Time$second, _user$project$Messages$Tick) : _elm_lang$core$Platform_Sub$none;
+var _user$project$Update$subscriptions = function (_p4) {
+	var _p5 = _p4;
+	return _p5.timerEnabled ? A2(_elm_lang$core$Time$every, _elm_lang$core$Time$second, _user$project$Messages$Tick) : _elm_lang$core$Platform_Sub$none;
 };
 
 var _user$project$Views$viewTimerSettingsChevron = function (show) {
@@ -8570,6 +8988,52 @@ var _user$project$Views$viewPlayButton = function (_p0) {
 					]))
 			]));
 };
+var _user$project$Views$timerFormat = '%M:%S';
+var _user$project$Views$viewStepHeader = function (_p3) {
+	var _p4 = _p3;
+	return A2(
+		_elm_lang$html$Html$div,
+		_elm_lang$core$Native_List.fromArray(
+			[
+				_elm_lang$html$Html_Attributes$class('row')
+			]),
+		_elm_lang$core$Native_List.fromArray(
+			[
+				A2(
+				_elm_lang$html$Html$h1,
+				_elm_lang$core$Native_List.fromArray(
+					[
+						_elm_lang$html$Html_Attributes$style(
+						_elm_lang$core$Native_List.fromArray(
+							[
+								{ctor: '_Tuple2', _0: 'text-align', _1: 'center'}
+							]))
+					]),
+				_elm_lang$core$Native_List.fromArray(
+					[
+						_elm_lang$html$Html$text(
+						_elm_lang$core$Basics$toString(_p4.pomodoroStep))
+					])),
+				A2(
+				_elm_lang$html$Html$h2,
+				_elm_lang$core$Native_List.fromArray(
+					[
+						_elm_lang$html$Html_Attributes$style(
+						_elm_lang$core$Native_List.fromArray(
+							[
+								{ctor: '_Tuple2', _0: 'text-align', _1: 'center'}
+							]))
+					]),
+				_elm_lang$core$Native_List.fromArray(
+					[
+						_elm_lang$html$Html$text(
+						A2(
+							_mgold$elm_date_format$Date_Format$format,
+							_user$project$Views$timerFormat,
+							_elm_lang$core$Date$fromTime(_p4.timer)))
+					]))
+			]));
+};
 var _user$project$Views$viewPomodoro = function (model) {
 	return A2(
 		_elm_lang$html$Html$div,
@@ -8583,157 +9047,126 @@ var _user$project$Views$viewPomodoro = function (model) {
 				_elm_lang$html$Html$div,
 				_elm_lang$core$Native_List.fromArray(
 					[
-						_elm_lang$html$Html_Attributes$class('col-xs-12 col-md-8 col-md-offset-2 jumbotron')
+						_elm_lang$html$Html_Attributes$class('row')
 					]),
 				_elm_lang$core$Native_List.fromArray(
 					[
 						A2(
-						_elm_lang$html$Html$h1,
+						_elm_lang$html$Html$div,
 						_elm_lang$core$Native_List.fromArray(
 							[
-								_elm_lang$html$Html_Attributes$style(
-								_elm_lang$core$Native_List.fromArray(
-									[
-										{ctor: '_Tuple2', _0: 'text-align', _1: 'center'}
-									]))
+								_elm_lang$html$Html_Attributes$class('col-xs-12 col-md-8 col-md-offset-2 jumbotron')
 							]),
 						_elm_lang$core$Native_List.fromArray(
 							[
-								_elm_lang$html$Html$text('Pomodoro')
-							])),
-						A2(
-						_elm_lang$html$Html$p,
-						_elm_lang$core$Native_List.fromArray(
-							[
-								_elm_lang$html$Html_Attributes$class('row')
-							]),
-						_elm_lang$core$Native_List.fromArray(
-							[
+								_user$project$Views$viewStepHeader(model),
 								A2(
-								_elm_lang$html$Html$span,
+								_elm_lang$html$Html$p,
 								_elm_lang$core$Native_List.fromArray(
 									[
-										_elm_lang$html$Html_Attributes$class('col-xs-8 col-md-6 col-xs-offset-2 col-md-offset-3')
+										_elm_lang$html$Html_Attributes$class('row'),
+										_elm_lang$html$Html_Attributes$style(
+										_elm_lang$core$Native_List.fromArray(
+											[
+												{ctor: '_Tuple2', _0: 'text-align', _1: 'center'}
+											]))
 									]),
 								_elm_lang$core$Native_List.fromArray(
 									[
+										_user$project$Views$viewPlayButton(model),
 										A2(
-										_elm_lang$html$Html$input,
+										_elm_lang$html$Html$div,
 										_elm_lang$core$Native_List.fromArray(
 											[
-												_elm_lang$html$Html_Attributes$class('form-control'),
-												_elm_lang$html$Html_Attributes$placeholder('Task Name')
-											]),
-										_elm_lang$core$Native_List.fromArray(
-											[]))
-									]))
-							])),
-						A2(
-						_elm_lang$html$Html$p,
-						_elm_lang$core$Native_List.fromArray(
-							[
-								_elm_lang$html$Html_Attributes$class('row'),
-								_elm_lang$html$Html_Attributes$style(
-								_elm_lang$core$Native_List.fromArray(
-									[
-										{ctor: '_Tuple2', _0: 'text-align', _1: 'center'}
-									]))
-							]),
-						_elm_lang$core$Native_List.fromArray(
-							[
-								_user$project$Views$viewPlayButton(model),
-								A2(
-								_elm_lang$html$Html$div,
-								_elm_lang$core$Native_List.fromArray(
-									[
-										_elm_lang$html$Html_Attributes$class('col-xs-3 col-md-3')
-									]),
-								_elm_lang$core$Native_List.fromArray(
-									[
-										A2(
-										_elm_lang$html$Html$button,
-										_elm_lang$core$Native_List.fromArray(
-											[
-												_elm_lang$html$Html_Attributes$class('btn btn-primary'),
-												_elm_lang$html$Html_Events$onClick(
-												_user$project$Messages$Do(_user$project$Models$Pomodoro))
+												_elm_lang$html$Html_Attributes$class('col-xs-3 col-md-3')
 											]),
 										_elm_lang$core$Native_List.fromArray(
 											[
 												A2(
-												_elm_lang$html$Html$span,
+												_elm_lang$html$Html$button,
 												_elm_lang$core$Native_List.fromArray(
 													[
-														_elm_lang$html$Html_Attributes$class('glyphicon glyphicon-calendar'),
-														A2(_elm_lang$html$Html_Attributes$attribute, 'aria-hidden', 'true')
+														_elm_lang$html$Html_Attributes$class('btn btn-primary'),
+														_elm_lang$html$Html_Events$onClick(
+														_user$project$Messages$Do(_user$project$Models$Pomodoro))
 													]),
 												_elm_lang$core$Native_List.fromArray(
-													[]))
+													[
+														A2(
+														_elm_lang$html$Html$span,
+														_elm_lang$core$Native_List.fromArray(
+															[
+																_elm_lang$html$Html_Attributes$class('glyphicon glyphicon-calendar'),
+																A2(_elm_lang$html$Html_Attributes$attribute, 'aria-hidden', 'true')
+															]),
+														_elm_lang$core$Native_List.fromArray(
+															[]))
+													]))
+											])),
+										A2(
+										_elm_lang$html$Html$div,
+										_elm_lang$core$Native_List.fromArray(
+											[
+												_elm_lang$html$Html_Attributes$class('col-xs-3 col-md-3')
+											]),
+										_elm_lang$core$Native_List.fromArray(
+											[
+												A2(
+												_elm_lang$html$Html$button,
+												_elm_lang$core$Native_List.fromArray(
+													[
+														_elm_lang$html$Html_Attributes$class('btn btn-primary'),
+														_elm_lang$html$Html_Events$onClick(
+														_user$project$Messages$Do(_user$project$Models$ShortBreak))
+													]),
+												_elm_lang$core$Native_List.fromArray(
+													[
+														A2(
+														_elm_lang$html$Html$span,
+														_elm_lang$core$Native_List.fromArray(
+															[
+																_elm_lang$html$Html_Attributes$class('glyphicon glyphicon-headphones'),
+																A2(_elm_lang$html$Html_Attributes$attribute, 'aria-hidden', 'true')
+															]),
+														_elm_lang$core$Native_List.fromArray(
+															[]))
+													]))
+											])),
+										A2(
+										_elm_lang$html$Html$div,
+										_elm_lang$core$Native_List.fromArray(
+											[
+												_elm_lang$html$Html_Attributes$class('col-xs-3 col-md-3')
+											]),
+										_elm_lang$core$Native_List.fromArray(
+											[
+												A2(
+												_elm_lang$html$Html$button,
+												_elm_lang$core$Native_List.fromArray(
+													[
+														_elm_lang$html$Html_Attributes$class('btn btn-primary'),
+														_elm_lang$html$Html_Events$onClick(
+														_user$project$Messages$Do(_user$project$Models$LongBreak))
+													]),
+												_elm_lang$core$Native_List.fromArray(
+													[
+														A2(
+														_elm_lang$html$Html$span,
+														_elm_lang$core$Native_List.fromArray(
+															[
+																_elm_lang$html$Html_Attributes$class('glyphicon glyphicon-eye-close'),
+																A2(_elm_lang$html$Html_Attributes$attribute, 'aria-hidden', 'true')
+															]),
+														_elm_lang$core$Native_List.fromArray(
+															[]))
+													]))
 											]))
 									])),
-								A2(
-								_elm_lang$html$Html$div,
-								_elm_lang$core$Native_List.fromArray(
-									[
-										_elm_lang$html$Html_Attributes$class('col-xs-3 col-md-3')
-									]),
-								_elm_lang$core$Native_List.fromArray(
-									[
-										A2(
-										_elm_lang$html$Html$button,
-										_elm_lang$core$Native_List.fromArray(
-											[
-												_elm_lang$html$Html_Attributes$class('btn btn-primary'),
-												_elm_lang$html$Html_Events$onClick(
-												_user$project$Messages$Do(_user$project$Models$ShortBreak))
-											]),
-										_elm_lang$core$Native_List.fromArray(
-											[
-												A2(
-												_elm_lang$html$Html$span,
-												_elm_lang$core$Native_List.fromArray(
-													[
-														_elm_lang$html$Html_Attributes$class('glyphicon glyphicon-headphones'),
-														A2(_elm_lang$html$Html_Attributes$attribute, 'aria-hidden', 'true')
-													]),
-												_elm_lang$core$Native_List.fromArray(
-													[]))
-											]))
-									])),
-								A2(
-								_elm_lang$html$Html$div,
-								_elm_lang$core$Native_List.fromArray(
-									[
-										_elm_lang$html$Html_Attributes$class('col-xs-3 col-md-3')
-									]),
-								_elm_lang$core$Native_List.fromArray(
-									[
-										A2(
-										_elm_lang$html$Html$button,
-										_elm_lang$core$Native_List.fromArray(
-											[
-												_elm_lang$html$Html_Attributes$class('btn btn-primary'),
-												_elm_lang$html$Html_Events$onClick(
-												_user$project$Messages$Do(_user$project$Models$LongBreak))
-											]),
-										_elm_lang$core$Native_List.fromArray(
-											[
-												A2(
-												_elm_lang$html$Html$span,
-												_elm_lang$core$Native_List.fromArray(
-													[
-														_elm_lang$html$Html_Attributes$class('glyphicon glyphicon-eye-close'),
-														A2(_elm_lang$html$Html_Attributes$attribute, 'aria-hidden', 'true')
-													]),
-												_elm_lang$core$Native_List.fromArray(
-													[]))
-											]))
-									]))
+								_user$project$Views$viewTimerSettings(model)
 							])),
-						_user$project$Views$viewTimerSettings(model)
-					])),
-				_elm_lang$html$Html$text(
-				_elm_lang$core$Basics$toString(model))
+						_elm_lang$html$Html$text(
+						_elm_lang$core$Basics$toString(model))
+					]))
 			]));
 };
 

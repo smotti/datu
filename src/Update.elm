@@ -34,16 +34,40 @@ update msg model =
       ( { model | timerEnabled = True } , Cmd.none )
 
     StopTimer ->
-      ( { model | timer = 0
-                , timerEnabled = False
-        }
-      , Cmd.none
-      )
+      let
+        time =
+          case model.pomodoroStep of
+            Pomodoro -> model.pomodoroTime
+            ShortBreak -> model.shortBreakTime
+            LongBreak -> model.longBreakTime
+      in
+        ( { model | timer = time
+                  , timerEnabled = False
+          }
+        , Cmd.none
+        )
 
     ToggleTimerSettings ->
       ( { model | showSettings = if model.showSettings then False else True }
       , Cmd.none
       )
 
-    Tick newTime ->
-      ( { model | timer = model.timer - 1 }, Cmd.none )
+    Tick _ ->
+      let
+        newTimer =
+          if not (model.timer <= 0) then
+            model.timer - second
+          else
+            model.timer
+        mustStop =
+          if model.timer <= 0 then
+            True
+          else
+            False
+      in
+        -- TODO: Send notification when times up
+        ( { model | timer = newTimer
+                  , timerEnabled = not mustStop
+          }
+        , Cmd.none
+        )

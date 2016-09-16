@@ -1,6 +1,9 @@
 module Views exposing (..)
 
-import Html exposing (Html, a, button, div, h1, input, p, span, text)
+import Date exposing (fromTime)
+import Date.Format exposing (format)
+import Debug exposing (log)
+import Html exposing (Html, a, button, div, h1, h2, input, p, span, text)
 import Html.Attributes exposing (attribute, class, href, id, placeholder, style,
   value)
 import Html.Events exposing (onClick)
@@ -9,52 +12,69 @@ import Models exposing (Model, PomodoroStep(..))
 import Update exposing (..)
 
 
+timerFormat : String
+timerFormat =
+  "%M:%S"
+
+
 viewPomodoro : Model -> Html Msg
 viewPomodoro model =
   div [ class "container-fluid" ]
-    [ div [ class "col-xs-12 col-md-8 col-md-offset-2 jumbotron" ]
-      -- TODO: Change heading based on step and also show time here
-      [ h1 [ style [("text-align", "center")] ] [ text "Pomodoro" ]
-      -- Task Name
-      , p [ class "row" ]
-        [ span [ class "col-xs-8 col-md-6 col-xs-offset-2 col-md-offset-3" ]
-          [ input [ class "form-control" , placeholder "Task Name" ] [] ]
+    [ div [ class "row" ]
+      [ div [ class "col-xs-12 col-md-8 col-md-offset-2 jumbotron" ]
+        -- TODO: Change heading based on step and also show time here
+        [ (viewStepHeader model)
+        {--
+        , p [ class "row" ]
+          [ span [ class "col-xs-8 col-md-6 col-xs-offset-2 col-md-offset-3" ]
+            [ input [ class "form-control" , placeholder "Task Name" ] [] ]
+          ]
+        --}
+        -- Control Buttons
+        , p [ class "row", style [("text-align", "center")] ]
+          -- Start/Stop
+          [ (viewPlayButton model) 
+          -- Pomodoro
+          , div [ class "col-xs-3 col-md-3" ]
+            [ button [ class "btn btn-primary", onClick <| Do Pomodoro ]
+              [ span
+                [ class "glyphicon glyphicon-calendar"
+                , attribute "aria-hidden" "true"
+                ] []
+              ]
+            ]
+          -- Short Break
+          , div [ class "col-xs-3 col-md-3" ]
+            [ button [ class "btn btn-primary", onClick <| Do ShortBreak ]
+              [ span
+                [ class "glyphicon glyphicon-headphones"
+                , attribute "aria-hidden" "true"
+                ] []
+              ]
+            ]
+          -- Long Break
+          , div [ class "col-xs-3 col-md-3" ]
+            [ button [ class "btn btn-primary", onClick <| Do LongBreak ]
+              [ span
+                [ class "glyphicon glyphicon-eye-close"
+                , attribute "aria-hidden" "true"
+                ] []
+              ]
+            ]
+          ]
+        , (viewTimerSettings model)
         ]
-      -- Control Buttons
-      , p [ class "row", style [("text-align", "center")] ]
-        -- Start/Stop
-        [ (viewPlayButton model) 
-        -- Pomodoro
-        , div [ class "col-xs-3 col-md-3" ]
-          [ button [ class "btn btn-primary", onClick <| Do Pomodoro ]
-            [ span
-              [ class "glyphicon glyphicon-calendar"
-              , attribute "aria-hidden" "true"
-              ] []
-            ]
-          ]
-        -- Short Break
-        , div [ class "col-xs-3 col-md-3" ]
-          [ button [ class "btn btn-primary", onClick <| Do ShortBreak ]
-            [ span
-              [ class "glyphicon glyphicon-headphones"
-              , attribute "aria-hidden" "true"
-              ] []
-            ]
-          ]
-        -- Long Break
-        , div [ class "col-xs-3 col-md-3" ]
-          [ button [ class "btn btn-primary", onClick <| Do LongBreak ]
-            [ span
-              [ class "glyphicon glyphicon-eye-close"
-              , attribute "aria-hidden" "true"
-              ] []
-            ]
-          ]
-        ]
-      , (viewTimerSettings model)
-      ]
-    , text <| toString model
+      , text <| toString model
+    ]
+  ]
+
+
+viewStepHeader : Model -> Html Msg
+viewStepHeader { pomodoroStep, timer } =
+  div [ class "row" ]
+    [ h1 [ style [("text-align", "center")] ] [ text <| toString pomodoroStep ]
+    , h2 [ style [("text-align", "center")] ]
+      [ text <| format timerFormat <| fromTime <| timer ]
     ]
 
 
