@@ -22,7 +22,6 @@ viewPomodoro model =
   div [ class "container-fluid" ]
     [ div [ class "row" ]
       [ div [ class "col-xs-12 col-md-8 col-md-offset-2 jumbotron" ]
-        -- TODO: Change heading based on step and also show time here
         [ (viewStepHeader model)
         {--
         , p [ class "row" ]
@@ -74,7 +73,7 @@ viewStepHeader { pomodoroStep, timer } =
   div [ class "row" ]
     [ h1 [ style [("text-align", "center")] ] [ text <| toString pomodoroStep ]
     , h2 [ style [("text-align", "center")] ]
-      [ text <| format timerFormat <| fromTime <| timer ]
+      [ text <| format timerFormat <| fromTime timer ]
     ]
 
 
