@@ -5,7 +5,7 @@ import Date.Format exposing (format)
 import Debug exposing (log)
 import Html exposing (Html, a, button, div, h1, h2, input, p, span, text)
 import Html.Attributes exposing (attribute, class, href, id, placeholder, style,
-  value)
+  type', value)
 import Html.Events exposing (onClick)
 import Messages exposing (..)
 import Models exposing (Model, PomodoroStep(..))
@@ -21,7 +21,8 @@ viewPomodoro : Model -> Html Msg
 viewPomodoro model =
   div [ class "container-fluid" ]
     [ div [ class "row" ]
-      [ div [ class "col-xs-12 col-md-8 col-md-offset-2 jumbotron" ]
+      [ (viewAlert model)
+      , div [ class "col-xs-12 col-md-8 col-md-offset-2 jumbotron" ]
         [ (viewStepHeader model)
         {--
         , p [ class "row" ]
@@ -66,6 +67,37 @@ viewPomodoro model =
       , text <| toString model
     ]
   ]
+
+
+viewAlert : Model -> Html Msg
+viewAlert { showAlert, alert, showNotifications } =
+  let
+      msg =
+        case alert of
+          Nothing -> "Unkown error"
+          Just a -> a.message
+      ofType =
+        case alert of
+          Nothing -> "alert-danger"
+          Just a -> a.ofType
+  in
+    if showAlert then
+      div
+        [ class <| "alert alert-dismissible " ++ ofType
+        , attribute "role" "alert"
+        , style [("text-align", "center")]
+        ]
+        [ button
+          [ type' "button"
+          , class "close"
+          , attribute "data-dismiss" "alert"
+          , attribute "aria-label" "Close"
+          ]
+          [ span [ attribute "aria-hidden" "true" ] [ text "x" ] ]
+        , text msg
+        ]
+    else
+      div [] []
 
 
 viewStepHeader : Model -> Html Msg

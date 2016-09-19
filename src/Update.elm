@@ -1,16 +1,19 @@
 module Update exposing (..)
 
+import Alert exposing (alert)
 import Messages exposing (..)
 import Models exposing (Model, PomodoroStep(..))
+import Notification exposing (permission)
 import Time exposing (Time, second)
 
 
 subscriptions : Model -> Sub Msg
 subscriptions { timerEnabled } =
-  if timerEnabled then
-    Time.every second Tick
-  else
-    Sub.none
+  Sub.batch
+    [ if timerEnabled then Time.every second Tick else Sub.none
+    , alert ShowAlert
+    , permission ShowNotifications
+    ]
 
 
 update : Msg -> Model -> (Model, Cmd Msg)
@@ -68,6 +71,30 @@ update msg model =
         -- TODO: Send notification when times up
         ( { model | timer = newTimer
                   , timerEnabled = not mustStop
+          }
+        , Cmd.none
+        )
+
+    ShowAlert (alertMsg, alertType) ->
+      ( { model | showAlert = True
+                , alert = Just { message = alertMsg, ofType = alertType }
+        }
+      , Cmd.none
+      )
+
+    ShowNotifications newPermission ->
+      let
+        show =
+          if newPermission == "granted" then
+            True
+          else
+            False
+      in
+        ( { model | showNotifications = show
+                  , showAlert = True
+                  , alert = Just { message = "Need permission to show system notifications"
+                                 , ofType = "alert-warning"
+                                 }
           }
         , Cmd.none
         )

@@ -10,3 +10,5 @@ type Msg
   | StartTimer
   | StopTimer
   | Do PomodoroStep
+  | ShowAlert (String, String)
+  | ShowNotifications String

@@ -9,6 +9,12 @@ type PomodoroStep
   | LongBreak
 
 
+type alias Alert =
+  { message : String
+  , ofType: String
+  }
+
+
 type alias Model =
   { showSettings : Bool
   , pomodoroTime : Time
@@ -17,6 +23,9 @@ type alias Model =
   , timer : Time
   , pomodoroStep : PomodoroStep
   , timerEnabled : Bool
+  , showAlert : Bool
+  , alert : Maybe Alert
+  , showNotifications : Bool
   }
 
 
@@ -44,4 +53,7 @@ model =
   , timer = defaultPomodoroTime
   , pomodoroStep = Pomodoro
   , timerEnabled = False
+  , showAlert = False
+  , alert = Nothing
+  , showNotifications = False
   }

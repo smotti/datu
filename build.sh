@@ -6,4 +6,6 @@ elm make \
   src/Messages.elm \
   src/Update.elm \
   src/Views.elm \
+  src/Notification.elm \
+  src/Alert.elm \
   --output=js/datu.js

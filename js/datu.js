@@ -8744,18 +8744,56 @@ var _mgold$elm_date_format$Date_Format$format = F2(
 	});
 var _mgold$elm_date_format$Date_Format$formatISO8601 = _mgold$elm_date_format$Date_Format$format('%Y-%m-%dT%H:%M:%SZ');
 
+var _user$project$Alert$alert = _elm_lang$core$Native_Platform.incomingPort(
+	'alert',
+	A3(
+		_elm_lang$core$Json_Decode$tuple2,
+		F2(
+			function (x1, x2) {
+				return {ctor: '_Tuple2', _0: x1, _1: x2};
+			}),
+		_elm_lang$core$Json_Decode$string,
+		_elm_lang$core$Json_Decode$string));
+
 var _user$project$Models$defaultLongBreakTime = 25 * _elm_lang$core$Time$minute;
 var _user$project$Models$defaultShortBreakTime = 5 * _elm_lang$core$Time$minute;
 var _user$project$Models$defaultPomodoroTime = 25 * _elm_lang$core$Time$minute;
-var _user$project$Models$Model = F7(
-	function (a, b, c, d, e, f, g) {
-		return {showSettings: a, pomodoroTime: b, shortBreakTime: c, longBreakTime: d, timer: e, pomodoroStep: f, timerEnabled: g};
+var _user$project$Models$Alert = F2(
+	function (a, b) {
+		return {message: a, ofType: b};
 	});
+var _user$project$Models$Model = function (a) {
+	return function (b) {
+		return function (c) {
+			return function (d) {
+				return function (e) {
+					return function (f) {
+						return function (g) {
+							return function (h) {
+								return function (i) {
+									return function (j) {
+										return {showSettings: a, pomodoroTime: b, shortBreakTime: c, longBreakTime: d, timer: e, pomodoroStep: f, timerEnabled: g, showAlert: h, alert: i, showNotifications: j};
+									};
+								};
+							};
+						};
+					};
+				};
+			};
+		};
+	};
+};
 var _user$project$Models$LongBreak = {ctor: 'LongBreak'};
 var _user$project$Models$ShortBreak = {ctor: 'ShortBreak'};
 var _user$project$Models$Pomodoro = {ctor: 'Pomodoro'};
-var _user$project$Models$model = {showSettings: false, pomodoroTime: _user$project$Models$defaultPomodoroTime, shortBreakTime: _user$project$Models$defaultShortBreakTime, longBreakTime: _user$project$Models$defaultLongBreakTime, timer: _user$project$Models$defaultPomodoroTime, pomodoroStep: _user$project$Models$Pomodoro, timerEnabled: false};
+var _user$project$Models$model = {showSettings: false, pomodoroTime: _user$project$Models$defaultPomodoroTime, shortBreakTime: _user$project$Models$defaultShortBreakTime, longBreakTime: _user$project$Models$defaultLongBreakTime, timer: _user$project$Models$defaultPomodoroTime, pomodoroStep: _user$project$Models$Pomodoro, timerEnabled: false, showAlert: false, alert: _elm_lang$core$Maybe$Nothing, showNotifications: false};
 
+var _user$project$Messages$ShowNotifications = function (a) {
+	return {ctor: 'ShowNotifications', _0: a};
+};
+var _user$project$Messages$ShowAlert = function (a) {
+	return {ctor: 'ShowAlert', _0: a};
+};
 var _user$project$Messages$Do = function (a) {
 	return {ctor: 'Do', _0: a};
 };
@@ -8765,6 +8803,8 @@ var _user$project$Messages$Tick = function (a) {
 	return {ctor: 'Tick', _0: a};
 };
 var _user$project$Messages$ToggleTimerSettings = {ctor: 'ToggleTimerSettings'};
+
+var _user$project$Notification$permission = _elm_lang$core$Native_Platform.incomingPort('permission', _elm_lang$core$Json_Decode$string);
 
 var _user$project$Update$update = F2(
 	function (msg, model) {
@@ -8827,7 +8867,7 @@ var _user$project$Update$update = F2(
 						}),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
-			default:
+			case 'Tick':
 				var mustStop = (_elm_lang$core$Native_Utils.cmp(model.timer, 0) < 1) ? true : false;
 				var newTimer = _elm_lang$core$Basics$not(
 					_elm_lang$core$Native_Utils.cmp(model.timer, 0) < 1) ? (model.timer - _elm_lang$core$Time$second) : model.timer;
@@ -8841,11 +8881,43 @@ var _user$project$Update$update = F2(
 						}),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
+			case 'ShowAlert':
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{
+							showAlert: true,
+							alert: _elm_lang$core$Maybe$Just(
+								{message: _p0._0._0, ofType: _p0._0._1})
+						}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			default:
+				var show = _elm_lang$core$Native_Utils.eq(_p0._0, 'granted') ? true : false;
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{
+							showNotifications: show,
+							showAlert: true,
+							alert: _elm_lang$core$Maybe$Just(
+								{message: 'Need permission to show system notifications', ofType: 'alert-warning'})
+						}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
 		}
 	});
 var _user$project$Update$subscriptions = function (_p4) {
 	var _p5 = _p4;
-	return _p5.timerEnabled ? A2(_elm_lang$core$Time$every, _elm_lang$core$Time$second, _user$project$Messages$Tick) : _elm_lang$core$Platform_Sub$none;
+	return _elm_lang$core$Platform_Sub$batch(
+		_elm_lang$core$Native_List.fromArray(
+			[
+				_p5.timerEnabled ? A2(_elm_lang$core$Time$every, _elm_lang$core$Time$second, _user$project$Messages$Tick) : _elm_lang$core$Platform_Sub$none,
+				_user$project$Alert$alert(_user$project$Messages$ShowAlert),
+				_user$project$Notification$permission(_user$project$Messages$ShowNotifications)
+			]));
 };
 
 var _user$project$Views$viewTimerSettingsChevron = function (show) {
@@ -8988,9 +9060,73 @@ var _user$project$Views$viewPlayButton = function (_p0) {
 					]))
 			]));
 };
-var _user$project$Views$timerFormat = '%M:%S';
-var _user$project$Views$viewStepHeader = function (_p3) {
+var _user$project$Views$viewAlert = function (_p3) {
 	var _p4 = _p3;
+	var _p7 = _p4.alert;
+	var ofType = function () {
+		var _p5 = _p7;
+		if (_p5.ctor === 'Nothing') {
+			return 'alert-danger';
+		} else {
+			return _p5._0.ofType;
+		}
+	}();
+	var msg = function () {
+		var _p6 = _p7;
+		if (_p6.ctor === 'Nothing') {
+			return 'Unkown error';
+		} else {
+			return _p6._0.message;
+		}
+	}();
+	return _p4.showAlert ? A2(
+		_elm_lang$html$Html$div,
+		_elm_lang$core$Native_List.fromArray(
+			[
+				_elm_lang$html$Html_Attributes$class(
+				A2(_elm_lang$core$Basics_ops['++'], 'alert alert-dismissible ', ofType)),
+				A2(_elm_lang$html$Html_Attributes$attribute, 'role', 'alert'),
+				_elm_lang$html$Html_Attributes$style(
+				_elm_lang$core$Native_List.fromArray(
+					[
+						{ctor: '_Tuple2', _0: 'text-align', _1: 'center'}
+					]))
+			]),
+		_elm_lang$core$Native_List.fromArray(
+			[
+				A2(
+				_elm_lang$html$Html$button,
+				_elm_lang$core$Native_List.fromArray(
+					[
+						_elm_lang$html$Html_Attributes$type$('button'),
+						_elm_lang$html$Html_Attributes$class('close'),
+						A2(_elm_lang$html$Html_Attributes$attribute, 'data-dismiss', 'alert'),
+						A2(_elm_lang$html$Html_Attributes$attribute, 'aria-label', 'Close')
+					]),
+				_elm_lang$core$Native_List.fromArray(
+					[
+						A2(
+						_elm_lang$html$Html$span,
+						_elm_lang$core$Native_List.fromArray(
+							[
+								A2(_elm_lang$html$Html_Attributes$attribute, 'aria-hidden', 'true')
+							]),
+						_elm_lang$core$Native_List.fromArray(
+							[
+								_elm_lang$html$Html$text('x')
+							]))
+					])),
+				_elm_lang$html$Html$text(msg)
+			])) : A2(
+		_elm_lang$html$Html$div,
+		_elm_lang$core$Native_List.fromArray(
+			[]),
+		_elm_lang$core$Native_List.fromArray(
+			[]));
+};
+var _user$project$Views$timerFormat = '%M:%S';
+var _user$project$Views$viewStepHeader = function (_p8) {
+	var _p9 = _p8;
 	return A2(
 		_elm_lang$html$Html$div,
 		_elm_lang$core$Native_List.fromArray(
@@ -9012,7 +9148,7 @@ var _user$project$Views$viewStepHeader = function (_p3) {
 				_elm_lang$core$Native_List.fromArray(
 					[
 						_elm_lang$html$Html$text(
-						_elm_lang$core$Basics$toString(_p4.pomodoroStep))
+						_elm_lang$core$Basics$toString(_p9.pomodoroStep))
 					])),
 				A2(
 				_elm_lang$html$Html$h2,
@@ -9030,7 +9166,7 @@ var _user$project$Views$viewStepHeader = function (_p3) {
 						A2(
 							_mgold$elm_date_format$Date_Format$format,
 							_user$project$Views$timerFormat,
-							_elm_lang$core$Date$fromTime(_p4.timer)))
+							_elm_lang$core$Date$fromTime(_p9.timer)))
 					]))
 			]));
 };
@@ -9051,6 +9187,7 @@ var _user$project$Views$viewPomodoro = function (model) {
 					]),
 				_elm_lang$core$Native_List.fromArray(
 					[
+						_user$project$Views$viewAlert(model),
 						A2(
 						_elm_lang$html$Html$div,
 						_elm_lang$core$Native_List.fromArray(
@@ -9177,12 +9314,16 @@ var _user$project$Datu$main = {
 };
 
 var Elm = {};
+Elm['Alert'] = Elm['Alert'] || {};
+_elm_lang$core$Native_Platform.addPublicModule(Elm['Alert'], 'Alert', typeof _user$project$Alert$main === 'undefined' ? null : _user$project$Alert$main);
 Elm['Datu'] = Elm['Datu'] || {};
 _elm_lang$core$Native_Platform.addPublicModule(Elm['Datu'], 'Datu', typeof _user$project$Datu$main === 'undefined' ? null : _user$project$Datu$main);
 Elm['Messages'] = Elm['Messages'] || {};
 _elm_lang$core$Native_Platform.addPublicModule(Elm['Messages'], 'Messages', typeof _user$project$Messages$main === 'undefined' ? null : _user$project$Messages$main);
 Elm['Models'] = Elm['Models'] || {};
 _elm_lang$core$Native_Platform.addPublicModule(Elm['Models'], 'Models', typeof _user$project$Models$main === 'undefined' ? null : _user$project$Models$main);
+Elm['Notification'] = Elm['Notification'] || {};
+_elm_lang$core$Native_Platform.addPublicModule(Elm['Notification'], 'Notification', typeof _user$project$Notification$main === 'undefined' ? null : _user$project$Notification$main);
 Elm['Update'] = Elm['Update'] || {};
 _elm_lang$core$Native_Platform.addPublicModule(Elm['Update'], 'Update', typeof _user$project$Update$main === 'undefined' ? null : _user$project$Update$main);
 Elm['Views'] = Elm['Views'] || {};
