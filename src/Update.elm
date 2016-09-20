@@ -27,6 +27,7 @@ update msg model =
       in
         ( { model | pomodoroStep = step
                   , timer = time
+                  , timerEnabled = False
           }
         , Cmd.none
         )

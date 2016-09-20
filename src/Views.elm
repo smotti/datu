@@ -3,9 +3,9 @@ module Views exposing (..)
 import Date exposing (fromTime)
 import Date.Format exposing (format)
 import Debug exposing (log)
-import Html exposing (Html, a, button, div, h1, h2, input, p, span, text)
-import Html.Attributes exposing (attribute, class, href, id, placeholder, style,
-  type', value)
+import Html exposing (Html, a, button, div, h1, h2, input, label, p, span, text)
+import Html.Attributes exposing (attribute, class, href, id, name, placeholder,
+  style, type', value)
 import Html.Events exposing (onClick)
 import Messages exposing (..)
 import Models exposing (Model, PomodoroStep(..))
@@ -31,37 +31,7 @@ viewPomodoro model =
           ]
         --}
         -- Control Buttons
-        , p [ class "row", style [("text-align", "center")] ]
-          -- Start/Stop
-          [ (viewPlayButton model) 
-          -- Pomodoro
-          , div [ class "col-xs-3 col-md-3" ]
-            [ button [ class "btn btn-primary", onClick <| Do Pomodoro ]
-              [ span
-                [ class "glyphicon glyphicon-calendar"
-                , attribute "aria-hidden" "true"
-                ] []
-              ]
-            ]
-          -- Short Break
-          , div [ class "col-xs-3 col-md-3" ]
-            [ button [ class "btn btn-primary", onClick <| Do ShortBreak ]
-              [ span
-                [ class "glyphicon glyphicon-headphones"
-                , attribute "aria-hidden" "true"
-                ] []
-              ]
-            ]
-          -- Long Break
-          , div [ class "col-xs-3 col-md-3" ]
-            [ button [ class "btn btn-primary", onClick <| Do LongBreak ]
-              [ span
-                [ class "glyphicon glyphicon-eye-close"
-                , attribute "aria-hidden" "true"
-                ] []
-              ]
-            ]
-          ]
+        , p [ class "row" ] [ (viewControlBottons model) ]
         , (viewTimerSettings model)
         ]
       --, text <| toString model
@@ -108,6 +78,70 @@ viewStepHeader { pomodoroStep, timer } =
     ]
 
 
+viewControlBottons : Model -> Html Msg
+viewControlBottons model =
+  let
+    currentStep = model.pomodoroStep
+  in
+    div
+      [ class "btn-group col-xs-12 col-md-12"
+      , attribute "data-toggle" "buttons"
+      , style [("display", "flex"), ("justify-content", "center")]
+      ]
+      [ (viewPlayButton model)
+      , label
+        [ class <| "btn btn-primary " ++ isActiveStep Pomodoro currentStep
+        , onClick <| Do Pomodoro
+        ]
+        [ input 
+          [ type' "radio"
+          , name "options"
+          , id "doPomodoro"
+          , attribute "autocomplete" "off"
+          ] []
+        , span
+          [ class "glyphicon glyphicon-calendar"
+          , attribute "aria-hidden" "true"
+          ] []
+        ]
+      , label
+        [ class <| "btn btn-primary " ++ isActiveStep ShortBreak currentStep
+        , onClick <| Do ShortBreak
+        ]
+        [ input 
+          [ type' "radio"
+          , name "options"
+          , id "doShortBreak"
+          , attribute "autocomplete" "off"
+          ] []
+        , span
+          [ class "glyphicon glyphicon-headphones"
+          , attribute "aria-hidden" "true"
+          ] []
+        ]
+      , label
+        [ class <| "btn btn-primary " ++ isActiveStep LongBreak currentStep
+        , onClick <| Do LongBreak
+        ]
+        [ input
+          [ type' "radio"
+          , name "options"
+          , id "doLongBreak"
+          , attribute "autocomplete" "off"
+          ] []
+        , span
+          [ class "glyphicon glyphicon-eye-close"
+          , attribute "aria-hidden" "true"
+          ] []
+        ]
+      ]
+
+
+isActiveStep : PomodoroStep -> PomodoroStep -> String
+isActiveStep step currentStep =
+  if step == currentStep then "active" else ""
+
+
 viewPlayButton : Model -> Html Msg
 viewPlayButton { timerEnabled } =
   let
@@ -116,15 +150,24 @@ viewPlayButton { timerEnabled } =
         (StopTimer, "glyphicon-stop")
       else
         (StartTimer, "glyphicon-play")
+    pressed =
+      if timerEnabled then "true" else "false"
+    active =
+      if timerEnabled then "active" else ""
   in
-    div [ class "col-xs-3 col-md-3" ]
-      [ button [ class "btn btn-primary", onClick msg ]
-        [ span
-          [ class <| "glyphicon " ++ glyph
-          , attribute "aria-hidden" "true"
-          ] []
-        ]
-      ]
+    button
+    [ class <| "btn btn-primary " ++ active
+    , onClick msg
+    , type' "button"
+    , attribute "data-toggle" "button"
+    , attribute "aria-pressed" pressed
+    , attribute "autocomplete" "off"
+    ]
+    [ span
+      [ class <| "glyphicon " ++ glyph
+      , attribute "aria-hidden" "true"
+      ] []
+    ]
 
 
 viewTimerSettings : Model -> Html Msg
