@@ -4,7 +4,7 @@ import Html.App as App
 import Messages exposing (Msg)
 import Models exposing (Model, model)
 import Update exposing (subscriptions, update)
-import Views as V
+import View as V
 
 
 init : (Model, Cmd Msg)

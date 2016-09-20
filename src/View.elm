@@ -1,4 +1,4 @@
-module Views exposing (..)
+module View exposing (..)
 
 import Date exposing (fromTime)
 import Date.Format exposing (format)

@@ -5,7 +5,7 @@ elm make \
   src/Models.elm \
   src/Messages.elm \
   src/Update.elm \
-  src/Views.elm \
+  src/View.elm \
   src/Notification.elm \
   src/Alert.elm \
   src/Commands.elm \
