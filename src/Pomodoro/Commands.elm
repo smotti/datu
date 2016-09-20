@@ -1,8 +1,8 @@
-module Commands exposing (..)
+module Pomodoro.Commands exposing (..)
 
-import Messages exposing(Msg)
-import Models exposing(notifications, PomodoroStep(..))
-import Notification exposing(notification)
+import Pomodoro.Messages exposing(Msg)
+import Pomodoro.Models exposing(PomodoroStep(..))
+import Notification exposing(notification, notifications)
 
 
 showNotification : PomodoroStep -> Cmd Msg

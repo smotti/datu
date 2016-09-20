@@ -1,15 +1,10 @@
 module Messages exposing (..)
 
-import Models exposing (PomodoroStep)
-import TimeSettings.Messages as TSM
+import Pomodoro.Messages as PM
 import Time exposing (Time)
 
 
 type Msg
-  = TimeSettingsMsg TSM.Msg
-  | Tick Time
-  | StartTimer
-  | StopTimer
-  | Do PomodoroStep
+  = PomodoroMsg PM.Msg
   | ShowAlert (String, String)
   | AllowNotifications String

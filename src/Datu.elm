@@ -4,7 +4,7 @@ import Html.App as App
 import Messages exposing (Msg)
 import Models exposing (Model, model)
 import Update exposing (subscriptions, update)
-import View as V
+import View exposing (view)
 
 
 init : (Model, Cmd Msg)
@@ -16,6 +16,6 @@ main =
   App.program
     { init = init
     , update = update
-    , view = V.viewPomodoro
+    , view = view
     , subscriptions = subscriptions
     }

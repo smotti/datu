@@ -1,76 +1,26 @@
 module Update exposing (..)
 
 import Alert exposing (alert)
-import Commands exposing (showNotification)
 import Debug
 import Messages exposing (..)
 import Models exposing (..)
 import Notification exposing (permission)
-import Time exposing (second)
-import TimeSettings.Subscriptions as TSS
-import TimeSettings.Update as TSU
+import Pomodoro.Subscriptions as PS
+import Pomodoro.Update as PU
 
 
 subscriptions : Model -> Sub Msg
-subscriptions { timeSettings, timerEnabled } =
+subscriptions model =
   Sub.batch
-    [ if timerEnabled then Time.every second Tick else Sub.none
-    , alert ShowAlert
+    [ alert ShowAlert
     , permission AllowNotifications
-    , Sub.map TimeSettingsMsg <| TSS.subscriptions timeSettings
+    , Sub.map PomodoroMsg <| (PS.subscriptions model.pomodoro)
     ]
 
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case msg of
-    Do step ->
-      let
-        time = getStepTime { model | pomodoroStep = step }
-      in
-        ( { model | pomodoroStep = step
-                  , timer = time
-                  , timerEnabled = False
-          }
-        , Cmd.none
-        )
-
-    StartTimer ->
-      ( { model | timerEnabled = True } , Cmd.none )
-
-    StopTimer ->
-      let
-        time = getStepTime model
-      in
-        ( { model | timer = time
-                  , timerEnabled = False
-          }
-        , Cmd.none
-        )
-
-    Tick _ ->
-      let
-        newTimer =
-          if not (model.timer <= 0) then
-            model.timer - second
-          else
-            model.timer
-        stepTime =
-          getStepTime model
-        mustStop =
-          if model.timer <= 0 then True else False
-        cmd =
-          if mustStop then
-            showNotification model.pomodoroStep
-          else
-            Cmd.none
-      in
-        ( { model | timer = if not mustStop then newTimer else stepTime
-                  , timerEnabled = not mustStop
-          }
-        , cmd
-        )
-
     ShowAlert (alertMsg, alertType) ->
       ( { model | showAlert = True
                 , alert = Just { message = alertMsg, ofType = alertType }
@@ -99,19 +49,9 @@ update msg model =
         , Cmd.none
         )
 
-    TimeSettingsMsg tsMsg ->
+    PomodoroMsg pmsg ->
       let
-        ( newTimeSettings, cmd ) =
-          TSU.update tsMsg model.timeSettings
-        newTimer =
-          case model.pomodoroStep of
-            LongBreak -> newTimeSettings.longBreakTime
-            Pomodoro -> newTimeSettings.pomodoroTime
-            ShortBreak -> newTimeSettings.shortBreakTime
+        ( newPomodoro, cmd ) =
+          PU.update pmsg model.pomodoro
       in
-        ( if model.timerEnabled then
-            { model | timeSettings = newTimeSettings }
-          else
-            { model | timeSettings = newTimeSettings, timer = newTimer }
-        , Cmd.map TimeSettingsMsg cmd
-        )
+        ( { model | pomodoro = newPomodoro }, Cmd.map PomodoroMsg cmd )
