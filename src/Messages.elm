@@ -12,3 +12,6 @@ type Msg
   | Do PomodoroStep
   | ShowAlert (String, String)
   | AllowNotifications String
+  | InputPomodoroTime String
+  | InputShortBreakTime String
+  | InputLongBreakTime String

@@ -8,30 +8,49 @@
     <title>Datu</title>
 
     <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="//www.fuelcdn.com/fuelux/3.13.0/css/fuelux.min.css" rel="stylesheet">
   </head>
-  <body>
+
+  <script src="js/datu.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+  <script src="js/bootstrap.min.js"></script>
+  <script src="//www.fuelcdn.com/fuelux/3.13.0/js/fuelux.min.js"></script>
+
+  <body class="fuelux">
     <div id="datu"></div>
-    
-    <script src="js/datu.js"></script>
-    <script>
-      var node = document.getElementById("datu");
-      var app = Elm.Datu.embed(node);
-
-      if (!("Notification" in window)) {
-	      app.ports.alert.send("This browser does not support system notifications", "alert-danger");
-      } else if (Notification.permission === "denied" || Notification.permission === "default") {
-        Notification.requestPermission().then(function(result) {
-          app.ports.permission.send(result);
-	      });
-      }
-
-      app.ports.notification.subscribe(function(msg) {
-        var n = new Notification('Datu', { body: msg });
-        setTimeout(n.close.bind(n), 5000);
-      });
-    </script>
-
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
-    <script src="js/bootstrap.min.js"></script>
   </body>
+
+  <script>
+    var node = document.getElementById("datu");
+    var app = Elm.Datu.embed(node);
+
+    if (!("Notification" in window)) {
+	    app.ports.alert.send("This browser does not support system notifications", "alert-danger");
+    } else if (Notification.permission === "denied" || Notification.permission === "default") {
+      Notification.requestPermission().then(function(result) {
+        app.ports.permission.send(result);
+	    });
+    }
+
+    app.ports.notification.subscribe(function(msg) {
+      var n = new Notification('Datu', { body: msg });
+      setTimeout(n.close.bind(n), 5000);
+    });
+
+    app.ports.addEventListeners.subscribe(function(enable) {
+      if (enable) {
+        $("#pomodoroTime").on("changed.fu.spinbox", function(e, v) {
+          app.ports.pomodoroTime.send(v);
+        });
+
+        $("#shortBreakTime").on("changed.fu.spinbox", function(e, v) {
+          app.ports.shortBreakTime.send(v);
+        });
+
+        $("#longBreakTime").on("changed.fu.spinbox", function(e, v) {
+          app.ports.longBreakTime.send(v);
+        });
+      }
+    });
+  </script>
 </html>

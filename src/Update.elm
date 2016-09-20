@@ -4,9 +4,19 @@ import Alert exposing (alert)
 import Commands exposing (showNotification)
 import Debug
 import Messages exposing (..)
-import Models exposing (Model, PomodoroStep(..), getStepTime)
+import Models exposing (..)
 import Notification exposing (permission)
-import Time exposing (Time, second)
+import Result exposing (withDefault)
+import String
+import Time exposing (Time, minute, second)
+import TimeSettings exposing (..)
+
+
+jsTimeToFloat : String -> Time -> Float
+jsTimeToFloat time defaultTime =
+  case String.toFloat time of
+    Ok t -> t * minute
+    Err _ -> defaultTime
 
 
 subscriptions : Model -> Sub Msg
@@ -15,6 +25,9 @@ subscriptions { timerEnabled } =
     [ if timerEnabled then Time.every second Tick else Sub.none
     , alert ShowAlert
     , permission AllowNotifications
+    , pomodoroTime InputPomodoroTime
+    , shortBreakTime InputShortBreakTime
+    , longBreakTime InputLongBreakTime
     ]
 
 
@@ -46,9 +59,18 @@ update msg model =
         )
 
     ToggleTimerSettings ->
-      ( { model | showSettings = if model.showSettings then False else True }
-      , Cmd.none
-      )
+      let
+        showSettings =
+          if model.showSettings then False else True
+        cmd =
+          if showSettings then
+            addEventListeners True
+          else
+            Cmd.none
+      in
+        ( { model | showSettings =  showSettings }
+        , cmd
+        )
 
     Tick _ ->
       let
@@ -100,3 +122,21 @@ update msg model =
           }
         , Cmd.none
         )
+
+    InputPomodoroTime newTime ->
+      let
+        timeAsFloat = jsTimeToFloat newTime defaultPomodoroTime
+      in
+        ( { model | pomodoroTime = timeAsFloat, timer = timeAsFloat }, Cmd.none )
+
+    InputShortBreakTime newTime ->
+      let
+        timeAsFloat = jsTimeToFloat newTime defaultShortBreakTime
+      in
+        ( { model | shortBreakTime = timeAsFloat, timer = timeAsFloat }, Cmd.none )
+
+    InputLongBreakTime newTime ->
+      let
+        timeAsFloat = jsTimeToFloat newTime defaultLongBreakTime
+      in
+        ( { model | longBreakTime = timeAsFloat, timer = timeAsFloat }, Cmd.none )

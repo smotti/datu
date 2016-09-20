@@ -2,13 +2,16 @@ module Views exposing (..)
 
 import Date exposing (fromTime)
 import Date.Format exposing (format)
-import Debug exposing (log)
-import Html exposing (Html, a, button, div, h1, h2, input, label, p, span, text)
+import Debug
+import Html exposing (Attribute, Html, a, button, div, h1, h2, input, label, p,
+  span, text)
 import Html.Attributes exposing (attribute, class, href, id, name, placeholder,
   style, type', value)
 import Html.Events exposing (onClick)
+import Json.Decode as Json
 import Messages exposing (..)
 import Models exposing (Model, PomodoroStep(..))
+import Time exposing (Time)
 import Update exposing (..)
 
 
@@ -31,7 +34,7 @@ viewPomodoro model =
           ]
         --}
         -- Control Buttons
-        , p [ class "row" ] [ (viewControlBottons model) ]
+        , p [ class "row" ] [ (viewControlButtons model) ]
         , (viewTimerSettings model)
         ]
       --, text <| toString model
@@ -78,8 +81,8 @@ viewStepHeader { pomodoroStep, timer } =
     ]
 
 
-viewControlBottons : Model -> Html Msg
-viewControlBottons model =
+viewControlButtons : Model -> Html Msg
+viewControlButtons model =
   let
     currentStep = model.pomodoroStep
   in
@@ -188,11 +191,42 @@ viewTimerSettings model =
       ]
     -- Timer settings
     , div [ class "row collapse", id "settings", style [("text-align", "center")] ]
-      [ p [ class "col-xs-4 col-md-4" ] [ text "Pomodoro Timer" ]
-      , p [ class "col-xs-4 col-md-4" ] [ text "SB Timer" ]
-      , p [ class "col-xs-4 col-md-4" ] [ text "LB Timer" ]
+      [ p [ class "col-xs-12 col-md-4" ]
+        [ (makeInputSpinbox "pomodoroTime" model.pomodoroTime) ]
+      , p [ class "col-xs-12 col-md-4" ]
+        [ (makeInputSpinbox "shortBreakTime" model.shortBreakTime) ]
+      , p [ class "col-xs-12 col-md-4" ]
+        [ (makeInputSpinbox "longBreakTime" model.longBreakTime) ]
       ]
     ]
+
+
+makeInputSpinbox : String -> Time -> Html Msg
+makeInputSpinbox nodeId initValue =
+  div 
+    [ class "spinbox"
+    , id nodeId
+    , attribute "data-initialize" "spinbox"
+    ]
+    [ input
+      [ class "form-control input-mini spinbox-input"
+      , type' "text"
+      , value <| format "%M" <| fromTime initValue
+      ] []
+    , div [ class "spinbox-buttons btn-group btn-group-vertical" ]
+      [ button
+        [ type' "button"
+        , class "btn btn-default spinbox-up btn-xs"
+        ]
+        [ span [ class "glyphicon glyphicon-chevron-up" ] [] ]
+      , button
+        [ type' "button"
+        , class "btn btn-default spinbox-down btn-xs"
+        ]
+        [ span [ class "glyphicon glyphicon-chevron-down" ] [] ]
+      ]
+    ]
+
 
 viewTimerSettingsChevron : Bool -> Html Msg
 viewTimerSettingsChevron show =
