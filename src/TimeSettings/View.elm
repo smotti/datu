@@ -6,6 +6,8 @@ import Date.Format exposing (format)
 import Html exposing (Html, a, button, div, input, p, span)
 import Html.Attributes exposing (attribute, class, href, id, style, type', value)
 import Html.Events exposing (onClick)
+import Regex exposing (HowMany(..), regex, split)
+import String exposing (join, toLower)
 import Time exposing (Time)
 import TimeSettings.Messages exposing (Msg(..))
 import TimeSettings.Models exposing (Model)
@@ -59,6 +61,14 @@ makeInputSpinbox nodeId initValue =
     [ class "spinbox"
     , id nodeId
     , attribute "data-initialize" "spinbox"
+    , attribute "data-toggle" "tooltip"
+    , attribute "data-placement" "top"
+    , attribute "title"
+                <| ( nodeId 
+                     |> split All (regex "(?=[A-Z]{1})")
+                     |> List.map toLower
+                     |> join " "
+                    )
     ]
     [ input
       [ class "form-control input-mini spinbox-input"
