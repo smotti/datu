@@ -64,13 +64,13 @@ viewPomodoro model =
           ]
         , (viewTimerSettings model)
         ]
-      , text <| toString model
+      --, text <| toString model
     ]
   ]
 
 
 viewAlert : Model -> Html Msg
-viewAlert { showAlert, alert, showNotifications } =
+viewAlert { showAlert, alert } =
   let
       msg =
         case alert of

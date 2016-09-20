@@ -25,7 +25,22 @@ type alias Model =
   , timerEnabled : Bool
   , showAlert : Bool
   , alert : Maybe Alert
-  , showNotifications : Bool
+  , allowNotifications : Bool
+  }
+
+
+type alias Notifications =
+  { pomodoro : String
+  , shortBreak : String
+  , longBreak : String
+  }
+
+
+notifications : Notifications
+notifications =
+  { pomodoro = "Time is up. Take a break."
+  , shortBreak = "Time is up. Back to work."
+  , longBreak = "Dude wake up! Time to get back to work."
   }
 
 
@@ -55,5 +70,13 @@ model =
   , timerEnabled = False
   , showAlert = False
   , alert = Nothing
-  , showNotifications = False
+  , allowNotifications = False
   }
+
+
+getStepTime : Model -> Time
+getStepTime model =
+  case model.pomodoroStep of
+    Pomodoro -> model.pomodoroTime
+    ShortBreak -> model.shortBreakTime
+    LongBreak -> model.longBreakTime

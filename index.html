@@ -18,12 +18,17 @@
       var app = Elm.Datu.embed(node);
 
       if (!("Notification" in window)) {
-	app.ports.alert.send("This browser does not support system notifications", "alert-danger");
+	      app.ports.alert.send("This browser does not support system notifications", "alert-danger");
       } else if (Notification.permission === "denied" || Notification.permission === "default") {
-	Notification.requestPermission(function (permission) {
-	  app.ports.permission.send(permission);
-	});
+        Notification.requestPermission().then(function(result) {
+          app.ports.permission.send(result);
+	      });
       }
+
+      app.ports.notification.subscribe(function(msg) {
+        var n = new Notification('Datu', { body: msg });
+        setTimeout(n.close.bind(n), 5000);
+      });
     </script>
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>

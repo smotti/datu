@@ -1,8 +1,10 @@
 module Update exposing (..)
 
 import Alert exposing (alert)
+import Commands exposing (showNotification)
+import Debug
 import Messages exposing (..)
-import Models exposing (Model, PomodoroStep(..))
+import Models exposing (Model, PomodoroStep(..), getStepTime)
 import Notification exposing (permission)
 import Time exposing (Time, second)
 
@@ -12,7 +14,7 @@ subscriptions { timerEnabled } =
   Sub.batch
     [ if timerEnabled then Time.every second Tick else Sub.none
     , alert ShowAlert
-    , permission ShowNotifications
+    , permission AllowNotifications
     ]
 
 
@@ -21,11 +23,7 @@ update msg model =
   case msg of
     Do step ->
       let
-        time =
-          case step of
-            Pomodoro -> model.pomodoroTime
-            ShortBreak -> model.shortBreakTime
-            LongBreak -> model.longBreakTime
+        time = getStepTime { model | pomodoroStep = step }
       in
         ( { model | pomodoroStep = step
                   , timer = time
@@ -38,11 +36,7 @@ update msg model =
 
     StopTimer ->
       let
-        time =
-          case model.pomodoroStep of
-            Pomodoro -> model.pomodoroTime
-            ShortBreak -> model.shortBreakTime
-            LongBreak -> model.longBreakTime
+        time = getStepTime model
       in
         ( { model | timer = time
                   , timerEnabled = False
@@ -62,17 +56,20 @@ update msg model =
             model.timer - second
           else
             model.timer
+        stepTime =
+          getStepTime model
         mustStop =
-          if model.timer <= 0 then
-            True
+          if model.timer <= 0 then True else False
+        cmd =
+          if mustStop then
+            showNotification model.pomodoroStep
           else
-            False
+            Cmd.none
       in
-        -- TODO: Send notification when times up
-        ( { model | timer = newTimer
+        ( { model | timer = if not mustStop then newTimer else stepTime
                   , timerEnabled = not mustStop
           }
-        , Cmd.none
+        , cmd
         )
 
     ShowAlert (alertMsg, alertType) ->
@@ -82,19 +79,23 @@ update msg model =
       , Cmd.none
       )
 
-    ShowNotifications newPermission ->
+    AllowNotifications newPermission ->
       let
         show =
-          if newPermission == "granted" then
-            True
+          if newPermission == "granted" then True else False
+        showAlert =
+          if not show then True else False
+        alert =
+          if showAlert then
+            Just { message = "Need permission to show system notifications"
+                 , ofType = "alert-warning"
+                 }
           else
-            False
+            Nothing
       in
-        ( { model | showNotifications = show
-                  , showAlert = True
-                  , alert = Just { message = "Need permission to show system notifications"
-                                 , ofType = "alert-warning"
-                                 }
+        ( { model | allowNotifications = show
+                  , showAlert = showAlert
+                  , alert =  alert
           }
         , Cmd.none
         )

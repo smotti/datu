@@ -8,4 +8,5 @@ elm make \
   src/Views.elm \
   src/Notification.elm \
   src/Alert.elm \
+  src/Commands.elm \
   --output=js/datu.js

@@ -11,4 +11,4 @@ type Msg
   | StopTimer
   | Do PomodoroStep
   | ShowAlert (String, String)
-  | ShowNotifications String
+  | AllowNotifications String
