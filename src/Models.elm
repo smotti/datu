@@ -1,6 +1,7 @@
 module Models exposing (..)
 
-import Time exposing (Time, minute)
+import Time exposing (Time)
+import TimeSettings.Models as TSMo
 
 
 type PomodoroStep
@@ -16,10 +17,7 @@ type alias Alert =
 
 
 type alias Model =
-  { showSettings : Bool
-  , pomodoroTime : Time
-  , shortBreakTime : Time
-  , longBreakTime : Time
+  { timeSettings : TSMo.Model
   , timer : Time
   , pomodoroStep : PomodoroStep
   , timerEnabled : Bool
@@ -44,28 +42,10 @@ notifications =
   }
 
 
-defaultPomodoroTime : Time
-defaultPomodoroTime =
-  25 * minute
-
-
-defaultShortBreakTime : Time
-defaultShortBreakTime =
-  5 * minute
-
-
-defaultLongBreakTime : Time
-defaultLongBreakTime =
-  25 * minute
-
-
 model : Model
 model =
-  { showSettings = False
-  , pomodoroTime = defaultPomodoroTime
-  , shortBreakTime = defaultShortBreakTime
-  , longBreakTime = defaultLongBreakTime
-  , timer = defaultPomodoroTime
+  { timeSettings = TSMo.defaultSettings
+  , timer = TSMo.defaultPomodoroTime
   , pomodoroStep = Pomodoro
   , timerEnabled = False
   , showAlert = False
@@ -77,6 +57,6 @@ model =
 getStepTime : Model -> Time
 getStepTime model =
   case model.pomodoroStep of
-    Pomodoro -> model.pomodoroTime
-    ShortBreak -> model.shortBreakTime
-    LongBreak -> model.longBreakTime
+    Pomodoro -> model.timeSettings.pomodoroTime
+    ShortBreak -> model.timeSettings.shortBreakTime
+    LongBreak -> model.timeSettings.longBreakTime

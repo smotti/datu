@@ -9,5 +9,10 @@ elm make \
   src/Notification.elm \
   src/Alert.elm \
   src/Commands.elm \
-  src/TimeSettings.elm \
+  src/TimeSettings/Models.elm \
+  src/TimeSettings/Messages.elm \
+  src/TimeSettings/Ports.elm \
+  src/TimeSettings/Subscriptions.elm \
+  src/TimeSettings/Update.elm \
+  src/TimeSettings/View.elm \
   --output=js/datu.js

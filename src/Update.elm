@@ -6,28 +6,18 @@ import Debug
 import Messages exposing (..)
 import Models exposing (..)
 import Notification exposing (permission)
-import Result exposing (withDefault)
-import String
-import Time exposing (Time, minute, second)
-import TimeSettings exposing (..)
-
-
-jsTimeToFloat : String -> Time -> Float
-jsTimeToFloat time defaultTime =
-  case String.toFloat time of
-    Ok t -> t * minute
-    Err _ -> defaultTime
+import Time exposing (second)
+import TimeSettings.Subscriptions as TSS
+import TimeSettings.Update as TSU
 
 
 subscriptions : Model -> Sub Msg
-subscriptions { timerEnabled } =
+subscriptions { timeSettings, timerEnabled } =
   Sub.batch
     [ if timerEnabled then Time.every second Tick else Sub.none
     , alert ShowAlert
     , permission AllowNotifications
-    , pomodoroTime InputPomodoroTime
-    , shortBreakTime InputShortBreakTime
-    , longBreakTime InputLongBreakTime
+    , Sub.map TimeSettingsMsg <| TSS.subscriptions timeSettings
     ]
 
 
@@ -56,20 +46,6 @@ update msg model =
                   , timerEnabled = False
           }
         , Cmd.none
-        )
-
-    ToggleTimerSettings ->
-      let
-        showSettings =
-          if model.showSettings then False else True
-        cmd =
-          if showSettings then
-            addEventListeners True
-          else
-            Cmd.none
-      in
-        ( { model | showSettings =  showSettings }
-        , cmd
         )
 
     Tick _ ->
@@ -123,20 +99,19 @@ update msg model =
         , Cmd.none
         )
 
-    InputPomodoroTime newTime ->
+    TimeSettingsMsg tsMsg ->
       let
-        timeAsFloat = jsTimeToFloat newTime defaultPomodoroTime
+        ( newTimeSettings, cmd ) =
+          TSU.update tsMsg model.timeSettings
+        newTimer =
+          case model.pomodoroStep of
+            LongBreak -> newTimeSettings.longBreakTime
+            Pomodoro -> newTimeSettings.pomodoroTime
+            ShortBreak -> newTimeSettings.shortBreakTime
       in
-        ( { model | pomodoroTime = timeAsFloat, timer = timeAsFloat }, Cmd.none )
-
-    InputShortBreakTime newTime ->
-      let
-        timeAsFloat = jsTimeToFloat newTime defaultShortBreakTime
-      in
-        ( { model | shortBreakTime = timeAsFloat, timer = timeAsFloat }, Cmd.none )
-
-    InputLongBreakTime newTime ->
-      let
-        timeAsFloat = jsTimeToFloat newTime defaultLongBreakTime
-      in
-        ( { model | longBreakTime = timeAsFloat, timer = timeAsFloat }, Cmd.none )
+        ( if model.timerEnabled then
+            { model | timeSettings = newTimeSettings }
+          else
+            { model | timeSettings = newTimeSettings, timer = newTimer }
+        , Cmd.map TimeSettingsMsg cmd
+        )

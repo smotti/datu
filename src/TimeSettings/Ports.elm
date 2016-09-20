@@ -1,4 +1,4 @@
-port module TimeSettings exposing (..)
+port module TimeSettings.Ports exposing (..)
 
 
 port addEventListeners : Bool -> Cmd msg

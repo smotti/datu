@@ -5,13 +5,13 @@ import Date.Format exposing (format)
 import Debug
 import Html exposing (Attribute, Html, a, button, div, h1, h2, input, label, p,
   span, text)
+import Html.App as App
 import Html.Attributes exposing (attribute, class, href, id, name, placeholder,
   style, type', value)
 import Html.Events exposing (onClick)
-import Json.Decode as Json
 import Messages exposing (..)
 import Models exposing (Model, PomodoroStep(..))
-import Time exposing (Time)
+import TimeSettings.View as TSV
 import Update exposing (..)
 
 
@@ -34,8 +34,8 @@ viewPomodoro model =
           ]
         --}
         -- Control Buttons
-        , p [ class "row" ] [ (viewControlButtons model) ]
-        , (viewTimerSettings model)
+        , (viewControlButtons model)
+        , App.map TimeSettingsMsg (TSV.viewSettings model.timeSettings)
         ]
       --, text <| toString model
     ]
@@ -86,56 +86,58 @@ viewControlButtons model =
   let
     currentStep = model.pomodoroStep
   in
-    div
-      [ class "btn-group col-xs-12 col-md-12"
-      , attribute "data-toggle" "buttons"
-      , style [("display", "flex"), ("justify-content", "center")]
-      ]
-      [ (viewPlayButton model)
-      , label
-        [ class <| "btn btn-primary " ++ isActiveStep Pomodoro currentStep
-        , onClick <| Do Pomodoro
+    p [ class "row" ]
+      [ div
+        [ class "btn-group col-xs-12 col-md-12"
+        , attribute "data-toggle" "buttons"
+        , style [("display", "flex"), ("justify-content", "center")]
         ]
-        [ input 
-          [ type' "radio"
-          , name "options"
-          , id "doPomodoro"
-          , attribute "autocomplete" "off"
-          ] []
-        , span
-          [ class "glyphicon glyphicon-calendar"
-          , attribute "aria-hidden" "true"
-          ] []
-        ]
-      , label
-        [ class <| "btn btn-primary " ++ isActiveStep ShortBreak currentStep
-        , onClick <| Do ShortBreak
-        ]
-        [ input 
-          [ type' "radio"
-          , name "options"
-          , id "doShortBreak"
-          , attribute "autocomplete" "off"
-          ] []
-        , span
-          [ class "glyphicon glyphicon-headphones"
-          , attribute "aria-hidden" "true"
-          ] []
-        ]
-      , label
-        [ class <| "btn btn-primary " ++ isActiveStep LongBreak currentStep
-        , onClick <| Do LongBreak
-        ]
-        [ input
-          [ type' "radio"
-          , name "options"
-          , id "doLongBreak"
-          , attribute "autocomplete" "off"
-          ] []
-        , span
-          [ class "glyphicon glyphicon-eye-close"
-          , attribute "aria-hidden" "true"
-          ] []
+        [ (viewPlayButton model)
+        , label
+          [ class <| "btn btn-primary " ++ isActiveStep Pomodoro currentStep
+          , onClick <| Do Pomodoro
+          ]
+          [ input 
+            [ type' "radio"
+            , name "options"
+            , id "doPomodoro"
+            , attribute "autocomplete" "off"
+            ] []
+          , span
+            [ class "glyphicon glyphicon-calendar"
+            , attribute "aria-hidden" "true"
+            ] []
+          ]
+        , label
+          [ class <| "btn btn-primary " ++ isActiveStep ShortBreak currentStep
+          , onClick <| Do ShortBreak
+          ]
+          [ input 
+            [ type' "radio"
+            , name "options"
+            , id "doShortBreak"
+            , attribute "autocomplete" "off"
+            ] []
+          , span
+            [ class "glyphicon glyphicon-headphones"
+            , attribute "aria-hidden" "true"
+            ] []
+          ]
+        , label
+          [ class <| "btn btn-primary " ++ isActiveStep LongBreak currentStep
+          , onClick <| Do LongBreak
+          ]
+          [ input
+            [ type' "radio"
+            , name "options"
+            , id "doLongBreak"
+            , attribute "autocomplete" "off"
+            ] []
+          , span
+            [ class "glyphicon glyphicon-eye-close"
+            , attribute "aria-hidden" "true"
+            ] []
+          ]
         ]
       ]
 
@@ -173,70 +175,4 @@ viewPlayButton { timerEnabled } =
     ]
 
 
-viewTimerSettings : Model -> Html Msg
-viewTimerSettings model =
-  div [ class "row" ]
-    [ p [ class "row" ]
-      [ a 
-        [ class "btn col-xs-12 col-md-12"
-        , attribute "role" "button"
-        , attribute "data-toggle" "collapse"
-        , href "#settings"
-        , attribute "aria-expanded" "false"
-        , attribute "aria-controls" "settingsCollapsable"
-        , style [("text-align", "center")]
-        , onClick ToggleTimerSettings
-        ] 
-        [ (viewTimerSettingsChevron model.showSettings) ]
-      ]
-    -- Timer settings
-    , div [ class "row collapse", id "settings", style [("text-align", "center")] ]
-      [ p [ class "col-xs-12 col-md-4" ]
-        [ (makeInputSpinbox "pomodoroTime" model.pomodoroTime) ]
-      , p [ class "col-xs-12 col-md-4" ]
-        [ (makeInputSpinbox "shortBreakTime" model.shortBreakTime) ]
-      , p [ class "col-xs-12 col-md-4" ]
-        [ (makeInputSpinbox "longBreakTime" model.longBreakTime) ]
-      ]
-    ]
 
-
-makeInputSpinbox : String -> Time -> Html Msg
-makeInputSpinbox nodeId initValue =
-  div 
-    [ class "spinbox"
-    , id nodeId
-    , attribute "data-initialize" "spinbox"
-    ]
-    [ input
-      [ class "form-control input-mini spinbox-input"
-      , type' "text"
-      , value <| format "%M" <| fromTime initValue
-      ] []
-    , div [ class "spinbox-buttons btn-group btn-group-vertical" ]
-      [ button
-        [ type' "button"
-        , class "btn btn-default spinbox-up btn-xs"
-        ]
-        [ span [ class "glyphicon glyphicon-chevron-up" ] [] ]
-      , button
-        [ type' "button"
-        , class "btn btn-default spinbox-down btn-xs"
-        ]
-        [ span [ class "glyphicon glyphicon-chevron-down" ] [] ]
-      ]
-    ]
-
-
-viewTimerSettingsChevron : Bool -> Html Msg
-viewTimerSettingsChevron show =
-  if show then
-    span
-      [ class "glyphicon glyphicon-chevron-up"
-      , attribute "aria-hidden" "true"
-      ] []
-  else
-    span
-      [ class "glyphicon glyphicon-chevron-down"
-      , attribute "aria-hidden" "true"
-      ] []
