@@ -9,6 +9,18 @@ task.
 * Keep track of work to do
 * Record of work
 
+# Requirements
+
+* Elm
+
+# Build
+
+Just run the build script:
+
+```
+$ ./build.sh
+```
+
 # License
 
 MIT
