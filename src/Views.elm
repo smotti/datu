@@ -80,24 +80,23 @@ viewAlert { showAlert, alert } =
         case alert of
           Nothing -> "alert-danger"
           Just a -> a.ofType
+      display =
+        if showAlert then ("display", "block") else ("display", "none")
   in
-    if showAlert then
-      div
-        [ class <| "alert alert-dismissible " ++ ofType
-        , attribute "role" "alert"
-        , style [("text-align", "center")]
+    div
+      [ class <| "alert alert-dismissible " ++ ofType
+      , attribute "role" "alert"
+      , style <| display :: [("text-align", "center")]
+      ]
+      [ button
+        [ type' "button"
+        , class "close"
+        , attribute "data-dismiss" "alert"
+        , attribute "aria-label" "Close"
         ]
-        [ button
-          [ type' "button"
-          , class "close"
-          , attribute "data-dismiss" "alert"
-          , attribute "aria-label" "Close"
-          ]
-          [ span [ attribute "aria-hidden" "true" ] [ text "x" ] ]
-        , text msg
-        ]
-    else
-      div [] []
+        [ span [ attribute "aria-hidden" "true" ] [ text "x" ] ]
+      , text msg
+      ]
 
 
 viewStepHeader : Model -> Html Msg
